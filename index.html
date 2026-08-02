@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="$hashbrown — the vibing hedgehog">
+  <meta name="referrer" content="origin-when-cross-origin">
+  <title>$hashbrown — the vibing hedgehog</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-chilling">
+  <header class="navbar">
+    <a class="brand" href="#top">
+      <strong>$hashbrown</strong>
+      <span>the vibing hedgehog</span>
+    </a>
+
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="#lore">lore</a>
+      <a href="https://x.com/i/communities/2038882006344622214" target="_blank" rel="noreferrer">x community</a>
+      <a href="https://pump.fun/coin/Ggec8Zysy299FA3kuFPrNwCEcUANrsbaBUvmvGscpump" target="_blank" rel="noreferrer">pump.fun</a>
+      <button class="copy-button" id="navCopyButton" type="button">copy ca</button>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-label="Vibing hedgehog selector">
+      <div class="scene" id="scene">
+        <img class="scene-media scene-image is-active" id="sceneImage" src="assets/chilling.png" alt="Selected vibe background">
+        <video class="scene-media scene-video" id="sceneVideo" muted loop playsinline preload="auto"></video>
+
+        <div class="scene-wiggle" id="sceneWiggle">
+          <canvas id="hedgehogCanvas" aria-label="Hashbrown dancing"></canvas>
+          <img id="hedgehogFallback" class="hedgehog-fallback" src="assets/hashbrown.gif" alt="Hashbrown dancing">
+        </div>
+
+        <div class="effects" id="effects" aria-hidden="true"></div>
+        <div class="electro-lights" aria-hidden="true"></div>
+        <div class="negative-flash" aria-hidden="true"></div>
+        <div class="screen-noise" aria-hidden="true"></div>
+        <div class="screen-vignette" aria-hidden="true"></div>
+      </div>
+
+      <div class="hero-title">
+        <h1>the vibing hedgehog</h1>
+      </div>
+
+      <div class="vibe-controls">
+        <button class="arrow" id="previousVibe" type="button" aria-label="Previous vibe">←</button>
+
+        <div class="vibe-info">
+          <span id="vibeCount">01 / 04</span>
+          <strong id="vibeName">chilling</strong>
+          <span id="trackName">bob marley — is this love</span>
+          <button class="play-button" id="playButton" type="button">
+            <span id="playIcon">▶</span>
+            <span id="playText">play</span>
+          </button>
+        </div>
+
+        <button class="arrow" id="nextVibe" type="button" aria-label="Next vibe">→</button>
+      </div>
+
+      <div class="hero-actions">
+        <a href="https://x.com/i/communities/2038882006344622214" target="_blank" rel="noreferrer">x community</a>
+        <a href="https://pump.fun/coin/Ggec8Zysy299FA3kuFPrNwCEcUANrsbaBUvmvGscpump" target="_blank" rel="noreferrer">pump.fun</a>
+        <button class="copy-button" id="heroCopyButton" type="button">copy ca</button>
+      </div>
+
+      <audio id="vibeAudio" preload="auto"></audio>
+    </section>
+
+    <section class="lore" id="lore">
+      <div class="lore-header">
+        <h2>lore</h2>
+        <p>hashbrown is the low-poly hedgehog created by <a href="https://x.com/ronnwaa" target="_blank" rel="noreferrer">@ronnwaa</a>. his ps2-style model, deliberately low-quality textures and adaptable dance make him work with any musical energy. the original videos were posted two years ago, and the hedgehog recently went viral again on x with more than two million views. his low-poly look, low-quality textures and dance are exactly why he fits every genre.</p>
+      </div>
+
+      <article class="lore-card lore-media-card">
+        <div class="lore-media-item">
+          <div class="card-label">original tiktok video</div>
+          <div class="tiktok-container">
+            <iframe class="tiktok-player" src="https://www.tiktok.com/player/v1/7281345852772289825?autoplay=0&loop=1" title="original tiktok video by ronnwaa" allow="fullscreen; autoplay" allowfullscreen></iframe>
+          </div>
+        </div>
+
+        <a class="viral-link" href="https://x.com/chodae3333/status/2083050268690931757" target="_blank" rel="noreferrer">
+          <div class="card-label">viral x post</div>
+          <img src="assets/lore.png" alt="viral x post with more than 2m views">
+          <div class="viral-copy">
+            <strong>more than 2m views</strong>
+            <span>open post ↗</span>
+          </div>
+        </a>
+      </article>
+
+      <div class="contract-section">
+        <span>contract address</span>
+        <code>Ggec8Zysy299FA3kuFPrNwCEcUANrsbaBUvmvGscpump</code>
+        <button class="copy-button" id="loreCopyButton" type="button">copy ca</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/gifuct-js@2.1.2/dist/gifuct-js.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
