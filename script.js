@@ -44,6 +44,83 @@ const vibes = [
     danceSpeed: 1,
     wiggleSpeed: 1,
     effect: "negative"
+  },
+  {
+    id: "backrooms",
+    name: "backrooms",
+    track: "home — resonance",
+    audio: "assets/backrooms.mp3",
+    background: "assets/backrooms.png",
+    backgroundType: "image",
+    danceSpeed: 0.85,
+    wiggleSpeed: 0.8,
+    effect: "none"
+  },
+  {
+    id: "casino",
+    name: "casino",
+    track: "michael bublé — feeling good",
+    audio: "assets/casino.mp3",
+    background: "assets/casino.png",
+    backgroundType: "image",
+    danceSpeed: 0.9,
+    wiggleSpeed: 0.9,
+    effect: "none"
+  },
+  {
+    id: "fridaynight",
+    name: "friday night",
+    track: "atlxs — passo bem solto",
+    audio: "assets/fridaynight.mp3",
+    background: "assets/fridaynight.png",
+    backgroundType: "image",
+    danceSpeed: 1.25,
+    wiggleSpeed: 1.25,
+    effect: "none"
+  },
+  {
+    id: "gtasa",
+    name: "gta san andreas",
+    track: "young maylay — san andreas theme",
+    audio: "assets/gtasa.mp3",
+    background: "assets/gtasa.png",
+    backgroundType: "image",
+    danceSpeed: 1,
+    wiggleSpeed: 1,
+    effect: "none"
+  },
+  {
+    id: "moon",
+    name: "moon",
+    track: "xxxtentacion — moonlight",
+    audio: "assets/moon.mp3",
+    background: "assets/moon.png",
+    backgroundType: "image",
+    danceSpeed: 1.05,
+    wiggleSpeed: 1,
+    effect: "none"
+  },
+  {
+    id: "nyse",
+    name: "new york stock exchange",
+    track: "pink floyd — money",
+    audio: "assets/nyse.mp3",
+    background: "assets/nyse.png",
+    backgroundType: "image",
+    danceSpeed: 0.95,
+    wiggleSpeed: 0.9,
+    effect: "none"
+  },
+  {
+    id: "pumpfun",
+    name: "pump.fun",
+    track: "kitschkrieg feat. blumengarten & shirin david — gut genug",
+    audio: "assets/pumpfun.mp3",
+    background: "assets/pumpfun.png",
+    backgroundType: "image",
+    danceSpeed: 1.1,
+    wiggleSpeed: 1.1,
+    effect: "none"
   }
 ];
 
