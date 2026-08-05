@@ -128,7 +128,7 @@ const body = document.body;
 const sceneImage = document.getElementById("sceneImage");
 const sceneVideo = document.getElementById("sceneVideo");
 const vibeAudio = document.getElementById("vibeAudio");
-vibeAudio.volume = 0.2;
+vibeAudio.volume = 0.1;
 const vibeName = document.getElementById("vibeName");
 const vibeCount = document.getElementById("vibeCount");
 const trackName = document.getElementById("trackName");
@@ -402,3 +402,199 @@ vibeAudio.addEventListener("ended", () => {
 
 updateVibe(currentIndex);
 loadHedgehogGif();
+
+
+const pfpConfig = {
+  bg: { count: 13, optional: false },
+  body: { count: 5, optional: false },
+  glass: { count: 3, optional: true },
+  hand: { count: 3, optional: true },
+  hat: { count: 7, optional: false },
+  overlay: { count: 8, optional: false }
+};
+
+const pfpLayerOrder = ["bg", "body", "glass", "hand", "hat", "overlay"];
+const pfpSelection = {
+  bg: 1,
+  body: 1,
+  glass: 0,
+  hand: 0,
+  hat: 1,
+  overlay: 1
+};
+
+const pfpCanvas = document.getElementById("pfpCanvas");
+const pfpContext = pfpCanvas.getContext("2d");
+const pfpImageCache = new Map();
+let pfpRenderVersion = 0;
+
+function getPfpAssetPath(trait, index) {
+  return `pfp editor/${trait}/${trait}${index}.png`;
+}
+
+function loadPfpImage(path) {
+  if (pfpImageCache.has(path)) return pfpImageCache.get(path);
+
+  const promise = new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error(`Could not load ${path}`));
+    image.src = path;
+  });
+
+  pfpImageCache.set(path, promise);
+  return promise;
+}
+
+function updateTraitLabel(trait) {
+  const value = pfpSelection[trait];
+  const config = pfpConfig[trait];
+  const label = document.getElementById(`${trait}Value`);
+
+  if (config.optional && value === 0) {
+    label.textContent = "none";
+    return;
+  }
+
+  label.textContent = `${String(value).padStart(2, "0")} / ${String(config.count).padStart(2, "0")}`;
+}
+
+async function renderPfp() {
+  const renderVersion = ++pfpRenderVersion;
+  const activeLayers = pfpLayerOrder.filter((trait) => pfpSelection[trait] > 0);
+
+  try {
+    const images = await Promise.all(
+      activeLayers.map((trait) => loadPfpImage(getPfpAssetPath(trait, pfpSelection[trait])))
+    );
+
+    if (renderVersion !== pfpRenderVersion) return;
+
+    pfpContext.clearRect(0, 0, pfpCanvas.width, pfpCanvas.height);
+    pfpContext.imageSmoothingEnabled = true;
+
+    images.forEach((image) => {
+      pfpContext.drawImage(image, 0, 0, pfpCanvas.width, pfpCanvas.height);
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+function changeTrait(trait, direction) {
+  const config = pfpConfig[trait];
+  const minimum = config.optional ? 0 : 1;
+  const totalOptions = config.count - minimum + 1;
+  const normalized = pfpSelection[trait] - minimum;
+
+  pfpSelection[trait] = ((normalized + direction + totalOptions) % totalOptions) + minimum;
+  updateTraitLabel(trait);
+  renderPfp();
+}
+
+function randomTrait(count) {
+  return Math.floor(Math.random() * count) + 1;
+}
+
+function randomOptionalTrait(count, chance = 0.3) {
+  return Math.random() < chance ? randomTrait(count) : 0;
+}
+
+function randomizePfp() {
+  pfpSelection.bg = randomTrait(pfpConfig.bg.count);
+  pfpSelection.body =
+  Math.random() < 0.5
+    ? 1
+    : Math.floor(Math.random() * 4) + 2;
+  pfpSelection.glass = randomOptionalTrait(pfpConfig.glass.count, 0.3);
+  pfpSelection.hand = randomOptionalTrait(pfpConfig.hand.count, 0.3);
+  pfpSelection.hat = randomTrait(pfpConfig.hat.count);
+  pfpSelection.overlay = randomTrait(pfpConfig.overlay.count);
+
+  pfpLayerOrder.forEach(updateTraitLabel);
+  renderPfp();
+}
+
+function downloadPfp() {
+  const link = document.createElement("a");
+  link.download = `hashbrown-pfp-${Date.now()}.png`;
+  link.href = pfpCanvas.toDataURL("image/png");
+  link.click();
+}
+
+for (const control of document.querySelectorAll(".trait-control")) {
+  const trait = control.dataset.trait;
+
+  for (const button of control.querySelectorAll(".trait-arrow")) {
+    button.addEventListener("click", () => {
+      changeTrait(trait, Number(button.dataset.direction));
+    });
+  }
+}
+
+document.getElementById("randomizePfp").addEventListener("click", randomizePfp);
+document.getElementById("downloadPfp").addEventListener("click", downloadPfp);
+
+pfpLayerOrder.forEach(updateTraitLabel);
+renderPfp();
+
+
+
+
+
+
+const pageSections = [...document.querySelectorAll("main > section")];
+
+let scrollLocked = false;
+
+window.addEventListener(
+  "wheel",
+  (event) => {
+    event.preventDefault();
+
+    if (scrollLocked) return;
+
+    scrollLocked = true;
+
+    const scrollingDown = event.deltaY > 0;
+    const currentScroll = window.scrollY;
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+
+    let currentIndex = 0;
+
+    pageSections.forEach((section, index) => {
+      if (currentScroll >= section.offsetTop - 100) {
+        currentIndex = index;
+      }
+    });
+
+    const isLastSection = currentIndex === pageSections.length - 1;
+    const isAtBottom = currentScroll >= maxScroll - 10;
+
+    if (scrollingDown && isLastSection && !isAtBottom) {
+      window.scrollTo({
+        top: maxScroll,
+        behavior: "smooth"
+      });
+    } else if (!scrollingDown && isLastSection && isAtBottom) {
+      pageSections[currentIndex].scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    } else {
+      const nextIndex = scrollingDown
+        ? Math.min(currentIndex + 1, pageSections.length - 1)
+        : Math.max(currentIndex - 1, 0);
+
+      pageSections[nextIndex].scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
+
+    setTimeout(() => {
+      scrollLocked = false;
+    }, 900);
+  },
+  { passive: false }
+);
