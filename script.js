@@ -594,7 +594,7 @@ window.addEventListener(
 
     setTimeout(() => {
       scrollLocked = false;
-    }, 900);
+    }, 700);
   },
   { passive: false }
 );
