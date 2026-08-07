@@ -557,8 +557,7 @@ for (const control of document.querySelectorAll(".trait-control")) {
 document.getElementById("randomizePfp").addEventListener("click", randomizePfp);
 document.getElementById("downloadPfp").addEventListener("click", downloadPfp);
 
-pfpLayerOrder.forEach(updateTraitLabel);
-renderPfp();
+randomizePfp();
 
 
 
