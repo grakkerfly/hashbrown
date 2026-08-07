@@ -22,6 +22,7 @@
     <nav class="nav-links" aria-label="Main navigation">
       <a href="#pfp-editor">pfp editor</a>
       <a href="#lore">lore</a>
+      <a href="#memes">meme gallery</a>
       <a href="https://x.com/i/communities/2038882006344622214" target="_blank" rel="noreferrer">x community</a>
       <a href="https://pump.fun/coin/Ggec8Zysy299FA3kuFPrNwCEcUANrsbaBUvmvGscpump" target="_blank" rel="noreferrer">pump.fun</a>
       <a href="https://t.me/addstickers/hashbrown69" target="_blank" rel="noreferrer">sticker pack</a>
@@ -86,6 +87,7 @@
       <div class="pfp-editor-layout">
         <div class="pfp-preview-card">
           <canvas id="pfpCanvas" width="1080" height="1080" aria-label="Hashbrown profile picture preview"></canvas>
+          <img id="pfpShareImage" class="pfp-share-image" alt="" draggable="false">
         </div>
 
         <div class="pfp-controls">
@@ -93,7 +95,7 @@
             <span>background</span>
             <div class="trait-selector">
               <button class="trait-arrow" type="button" data-direction="-1" aria-label="Previous background">←</button>
-              <strong id="bgValue">01 / 13</strong>
+              <strong id="bgValue">01 / 20</strong>
               <button class="trait-arrow" type="button" data-direction="1" aria-label="Next background">→</button>
             </div>
           </div>
@@ -102,17 +104,26 @@
             <span>body</span>
             <div class="trait-selector">
               <button class="trait-arrow" type="button" data-direction="-1" aria-label="Previous body">←</button>
-              <strong id="bodyValue">01 / 06</strong>
+              <strong id="bodyValue">01 / 09</strong>
               <button class="trait-arrow" type="button" data-direction="1" aria-label="Next body">→</button>
             </div>
           </div>
 
-          <div class="trait-control" data-trait="glass">
-            <span>glasses</span>
+          <div class="trait-control" data-trait="eye">
+            <span>eye</span>
             <div class="trait-selector">
-              <button class="trait-arrow" type="button" data-direction="-1" aria-label="Previous glasses">←</button>
-              <strong id="glassValue">none</strong>
-              <button class="trait-arrow" type="button" data-direction="1" aria-label="Next glasses">→</button>
+              <button class="trait-arrow" type="button" data-direction="-1" aria-label="Previous eye">←</button>
+              <strong id="eyeValue">none</strong>
+              <button class="trait-arrow" type="button" data-direction="1" aria-label="Next eye">→</button>
+            </div>
+          </div>
+
+          <div class="trait-control" data-trait="hat">
+            <span>hat</span>
+            <div class="trait-selector">
+              <button class="trait-arrow" type="button" data-direction="-1" aria-label="Previous hat">←</button>
+              <strong id="hatValue">01 / 14</strong>
+              <button class="trait-arrow" type="button" data-direction="1" aria-label="Next hat">→</button>
             </div>
           </div>
 
@@ -125,20 +136,11 @@
             </div>
           </div>
 
-          <div class="trait-control" data-trait="hat">
-            <span>hat</span>
-            <div class="trait-selector">
-              <button class="trait-arrow" type="button" data-direction="-1" aria-label="Previous hat">←</button>
-              <strong id="hatValue">01 / 07</strong>
-              <button class="trait-arrow" type="button" data-direction="1" aria-label="Next hat">→</button>
-            </div>
-          </div>
-
           <div class="trait-control" data-trait="overlay">
             <span>overlay</span>
             <div class="trait-selector">
               <button class="trait-arrow" type="button" data-direction="-1" aria-label="Previous overlay">←</button>
-              <strong id="overlayValue">01 / 08</strong>
+              <strong id="overlayValue">01 / 13</strong>
               <button class="trait-arrow" type="button" data-direction="1" aria-label="Next overlay">→</button>
             </div>
           </div>
@@ -180,6 +182,27 @@
         <button class="copy-button" id="loreCopyButton" type="button">copy ca</button>
       </div>
     </section>
+
+    <section class="meme-gallery" id="memes">
+      <div class="meme-gallery-header">
+        <h2>meme gallery</h2>
+        <div class="meme-tabs" role="tablist" aria-label="Meme gallery filters">
+          <button class="meme-tab is-active" type="button" data-gallery-type="photos" role="tab" aria-selected="true">photos</button>
+          <button class="meme-tab" type="button" data-gallery-type="videos" role="tab" aria-selected="false">videos</button>
+        </div>
+      </div>
+
+      <div class="meme-grid" id="memeGrid"></div>
+    </section>
+
+    <div class="meme-modal" id="memeModal" aria-hidden="true">
+      <button class="meme-modal-close" id="memeModalClose" type="button" aria-label="Close media">×</button>
+      <button class="meme-modal-arrow meme-modal-previous" id="memeModalPrevious" type="button" aria-label="Previous media">←</button>
+      <div class="meme-modal-content" id="memeModalContent">
+        <div class="meme-modal-frame" id="memeModalFrame"></div>
+      </div>
+      <button class="meme-modal-arrow meme-modal-next" id="memeModalNext" type="button" aria-label="Next media">→</button>
+    </div>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/gifuct-js@2.1.2/dist/gifuct-js.min.js"></script>

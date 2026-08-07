@@ -142,7 +142,7 @@ const canvas = document.getElementById("hedgehogCanvas");
 const fallback = document.getElementById("hedgehogFallback");
 const context = canvas.getContext("2d");
 
-let currentIndex = 0;
+let currentIndex = Math.floor(Math.random() * vibes.length);
 let isPlaying = false;
 let gifFrames = [];
 let gifWidth = 0;
@@ -150,7 +150,7 @@ let gifHeight = 0;
 let frameIndex = 0;
 let frameTimer = null;
 let gifReady = false;
-let danceSpeed = vibes[0].danceSpeed;
+let danceSpeed = vibes[currentIndex].danceSpeed;
 let frameCanvas = document.createElement("canvas");
 let frameContext = frameCanvas.getContext("2d");
 
@@ -405,19 +405,19 @@ loadHedgehogGif();
 
 
 const pfpConfig = {
-  bg: { count: 13, optional: false },
-  body: { count: 5, optional: false },
-  glass: { count: 3, optional: true },
-  hand: { count: 3, optional: true },
-  hat: { count: 7, optional: false },
-  overlay: { count: 8, optional: false }
+  bg: { count: 20, optional: false },
+  body: { count: 9, optional: false },
+  eye: { count: 8, optional: true },
+  hand: { count: 8, optional: true },
+  hat: { count: 14, optional: false },
+  overlay: { count: 13, optional: false }
 };
 
-const pfpLayerOrder = ["bg", "body", "glass", "hand", "hat", "overlay"];
+const pfpLayerOrder = ["bg", "body", "eye", "hat", "hand", "overlay"];
 const pfpSelection = {
   bg: 1,
   body: 1,
-  glass: 0,
+  eye: 0,
   hand: 0,
   hat: 1,
   overlay: 1
@@ -425,6 +425,7 @@ const pfpSelection = {
 
 const pfpCanvas = document.getElementById("pfpCanvas");
 const pfpContext = pfpCanvas.getContext("2d");
+const pfpShareImage = document.getElementById("pfpShareImage");
 const pfpImageCache = new Map();
 let pfpRenderVersion = 0;
 
@@ -476,6 +477,10 @@ async function renderPfp() {
     images.forEach((image) => {
       pfpContext.drawImage(image, 0, 0, pfpCanvas.width, pfpCanvas.height);
     });
+
+    pfpShareImage.classList.remove("is-ready");
+    pfpShareImage.onload = () => pfpShareImage.classList.add("is-ready");
+    pfpShareImage.src = pfpCanvas.toDataURL("image/png");
   } catch (error) {
     console.error(error);
   }
@@ -496,30 +501,47 @@ function randomTrait(count) {
   return Math.floor(Math.random() * count) + 1;
 }
 
-function randomOptionalTrait(count, chance = 0.3) {
-  return Math.random() < chance ? randomTrait(count) : 0;
-}
-
 function randomizePfp() {
   pfpSelection.bg = randomTrait(pfpConfig.bg.count);
-  pfpSelection.body =
-  Math.random() < 0.5
-    ? 1
-    : Math.floor(Math.random() * 4) + 2;
-  pfpSelection.glass = randomOptionalTrait(pfpConfig.glass.count, 0.3);
-  pfpSelection.hand = randomOptionalTrait(pfpConfig.hand.count, 0.3);
+  pfpSelection.body = randomTrait(pfpConfig.body.count);
+  pfpSelection.eye = randomTrait(pfpConfig.eye.count);
   pfpSelection.hat = randomTrait(pfpConfig.hat.count);
+  pfpSelection.hand = randomTrait(pfpConfig.hand.count);
   pfpSelection.overlay = randomTrait(pfpConfig.overlay.count);
 
   pfpLayerOrder.forEach(updateTraitLabel);
   renderPfp();
 }
 
-function downloadPfp() {
+async function downloadPfp() {
+  const filename = `hashbrown-pfp-${Date.now()}.png`;
+
+  const blob = await new Promise((resolve) => pfpCanvas.toBlob(resolve, "image/png"));
+
+  if (!blob) {
+    window.open(pfpCanvas.toDataURL("image/png"), "_blank");
+    return;
+  }
+
+  const file = new File([blob], filename, { type: "image/png" });
+
+  if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file] });
+      return;
+    } catch (error) {
+      if (error.name === "AbortError") return;
+    }
+  }
+
+  const objectUrl = URL.createObjectURL(blob);
   const link = document.createElement("a");
-  link.download = `hashbrown-pfp-${Date.now()}.png`;
-  link.href = pfpCanvas.toDataURL("image/png");
+  link.download = filename;
+  link.href = objectUrl;
+  document.body.appendChild(link);
   link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
 }
 
 for (const control of document.querySelectorAll(".trait-control")) {
@@ -543,58 +565,135 @@ renderPfp();
 
 
 
-const pageSections = [...document.querySelectorAll("main > section")];
+const memeMedia = {
+  photos: Array.from({ length: 11 }, (_, index) => ({
+    type: "image",
+    src: `assets/memes/meme${index + 1}.png`
+  })),
+  videos: Array.from({ length: 13 }, (_, index) => ({
+    type: "video",
+    src: `assets/memes/vid${index + 1}.mp4`
+  }))
+};
 
-let scrollLocked = false;
+const memeGrid = document.getElementById("memeGrid");
+const memeTabs = [...document.querySelectorAll(".meme-tab")];
+const memeModal = document.getElementById("memeModal");
+const memeModalContent = document.getElementById("memeModalContent");
+const memeModalFrame = document.getElementById("memeModalFrame");
+const memeModalClose = document.getElementById("memeModalClose");
+const memeModalPrevious = document.getElementById("memeModalPrevious");
+const memeModalNext = document.getElementById("memeModalNext");
+let activeMemeType = "photos";
+let activeMemeIndex = 0;
+let resumeVibeAfterMemeVideo = false;
 
-window.addEventListener(
-  "wheel",
-  (event) => {
-    event.preventDefault();
+function renderMemeGallery() {
+  memeGrid.innerHTML = "";
 
-    if (scrollLocked) return;
+  memeMedia[activeMemeType].forEach((media, index) => {
+    const button = document.createElement("button");
+    button.className = "meme-item";
+    button.type = "button";
+    button.setAttribute("aria-label", `Open ${activeMemeType === "photos" ? "photo" : "video"} ${index + 1}`);
 
-    scrollLocked = true;
-
-    const scrollingDown = event.deltaY > 0;
-    const currentScroll = window.scrollY;
-    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-
-    let currentIndex = 0;
-
-    pageSections.forEach((section, index) => {
-      if (currentScroll >= section.offsetTop - 100) {
-        currentIndex = index;
-      }
-    });
-
-    const isLastSection = currentIndex === pageSections.length - 1;
-    const isAtBottom = currentScroll >= maxScroll - 10;
-
-    if (scrollingDown && isLastSection && !isAtBottom) {
-      window.scrollTo({
-        top: maxScroll,
-        behavior: "smooth"
-      });
-    } else if (!scrollingDown && isLastSection && isAtBottom) {
-      pageSections[currentIndex].scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
-    } else {
-      const nextIndex = scrollingDown
-        ? Math.min(currentIndex + 1, pageSections.length - 1)
-        : Math.max(currentIndex - 1, 0);
-
-      pageSections[nextIndex].scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
+    const element = document.createElement(media.type === "image" ? "img" : "video");
+    element.src = media.src;
+    if (media.type === "video") {
+      element.muted = true;
+      element.loop = true;
+      element.playsInline = true;
+      element.preload = "metadata";
     }
 
-    setTimeout(() => {
-      scrollLocked = false;
-    }, 700);
-  },
-  { passive: false }
-);
+    button.appendChild(element);
+    button.addEventListener("click", () => openMemeModal(index));
+    memeGrid.appendChild(button);
+  });
+}
+
+function renderMemeModal() {
+  const media = memeMedia[activeMemeType][activeMemeIndex];
+  memeModalFrame.innerHTML = "";
+
+  const element = document.createElement(media.type === "image" ? "img" : "video");
+  element.src = media.src;
+
+  if (media.type === "video") {
+    element.controls = true;
+    element.autoplay = true;
+    element.playsInline = true;
+  }
+
+  memeModalFrame.appendChild(element);
+}
+
+function openMemeModal(index) {
+  activeMemeIndex = index;
+
+  if (activeMemeType === "videos") {
+    resumeVibeAfterMemeVideo = isPlaying;
+    if (isPlaying) setPlayback(false);
+  }
+
+  renderMemeModal();
+  memeModal.classList.add("is-open");
+  memeModal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("meme-modal-open");
+}
+
+function closeMemeModal() {
+  memeModal.classList.remove("is-open");
+  memeModal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("meme-modal-open");
+  memeModalFrame.innerHTML = "";
+
+  if (resumeVibeAfterMemeVideo) {
+    resumeVibeAfterMemeVideo = false;
+    setPlayback(true);
+  }
+}
+
+function changeMeme(direction) {
+  const media = memeMedia[activeMemeType];
+  activeMemeIndex = (activeMemeIndex + direction + media.length) % media.length;
+  renderMemeModal();
+}
+
+memeTabs.forEach((tab) => {
+  tab.addEventListener("click", () => {
+    activeMemeType = tab.dataset.galleryType;
+    memeTabs.forEach((item) => {
+      const isActive = item === tab;
+      item.classList.toggle("is-active", isActive);
+      item.setAttribute("aria-selected", String(isActive));
+    });
+    renderMemeGallery();
+  });
+});
+
+memeModalClose.addEventListener("click", closeMemeModal);
+memeModalPrevious.addEventListener("click", () => changeMeme(-1));
+memeModalNext.addEventListener("click", () => changeMeme(1));
+memeModal.addEventListener("click", (event) => {
+  const clickedMedia = event.target.closest(".meme-modal-content img, .meme-modal-content video");
+  const clickedControl = event.target.closest(".meme-modal-close, .meme-modal-arrow");
+  if (!clickedMedia && !clickedControl) closeMemeModal();
+});
+
+window.addEventListener("keydown", (event) => {
+  if (!memeModal.classList.contains("is-open")) return;
+  if (event.key === "ArrowLeft") {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    changeMeme(-1);
+  }
+  if (event.key === "ArrowRight") {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    changeMeme(1);
+  }
+  if (event.key === "Escape") closeMemeModal();
+}, true);
+
+renderMemeGallery();
