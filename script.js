@@ -19,7 +19,7 @@ const vibes=[
 
 const canvas=document.getElementById("dancefloorCanvas");
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:"high-performance"});
-renderer.setPixelRatio(Math.min(devicePixelRatio,1.5)); renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.setPixelRatio(matchMedia("(max-width: 820px)").matches ? 0.9 : Math.min(devicePixelRatio,1.5)); renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.15;
 const scene=new THREE.Scene(); scene.background=null;
 let camera=new THREE.PerspectiveCamera(38,1,.01,5000);
@@ -69,13 +69,11 @@ function updateVibeBackground(v){
   vibeBackgroundImage.classList.remove("is-active");
   vibeBackgroundVideo.classList.remove("is-active");
   vibeBackgroundVideo.pause();
-
   if(matchMedia("(max-width: 820px)").matches){
     vibeBackgroundVideo.removeAttribute("src");
     vibeBackgroundVideo.load();
     return;
   }
-
   if(v.backgroundType==="video"){
     vibeBackgroundVideo.src=v.background;
     vibeBackgroundVideo.classList.add("is-active");
@@ -121,41 +119,3 @@ document.querySelectorAll("[data-open-modal]").forEach(button=>button.addEventLi
 document.querySelectorAll("[data-close-modal]").forEach(button=>button.addEventListener("click",()=>closeAppModal(button.closest(".app-modal"))));
 document.querySelectorAll(".app-modal").forEach(item=>item.addEventListener("click",event=>{if(event.target===item)closeAppModal(item)}));
 window.addEventListener("keydown",event=>{if(event.key!=="Escape")return;const opened=document.querySelector(".app-modal.is-open");if(opened)closeAppModal(opened)});
-
-/* =========================================================
-   MOBILE PERFORMANCE MODE v2
-   - Desktop permanece com o comportamento original.
-   - Mobile usa WebGL a 90% para preservar nitidez.
-   - Reduz efeitos de composição e iluminação, sem deixar a
-     cena com aparência excessivamente pixelada.
-   ========================================================= */
-(() => {
-  const mobileQuery = window.matchMedia("(max-width: 820px)");
-
-  if (!mobileQuery.matches) return;
-
-  console.log("[hashbrown] mobile performance mode v2");
-
-  // 90% de resolução interna: mais nítido que a versão anterior.
-  renderer.setPixelRatio(0.9);
-
-  // Iluminação dinâmica mais leve.
-  pink.intensity = 9;
-  blue.intensity = 9;
-
-  // Garantir culling no modelo caso ele já tenha carregado.
-  if (modelRoot) {
-    modelRoot.traverse(obj => {
-      if (!obj.isMesh) return;
-      obj.frustumCulled = true;
-      obj.castShadow = false;
-      obj.receiveShadow = false;
-    });
-  }
-
-  // Quando a aba fica em segundo plano, economiza GPU.
-  document.addEventListener("visibilitychange", () => {
-    renderer.setPixelRatio(document.hidden ? 0.6 : 0.9);
-  });
-})();
-
