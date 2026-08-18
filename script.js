@@ -123,73 +123,39 @@ document.querySelectorAll(".app-modal").forEach(item=>item.addEventListener("cli
 window.addEventListener("keydown",event=>{if(event.key!=="Escape")return;const opened=document.querySelector(".app-modal.is-open");if(opened)closeAppModal(opened)});
 
 /* =========================================================
-   MOBILE PERFORMANCE MODE
-   Desktop permanece com o comportamento original.
+   MOBILE PERFORMANCE MODE v2
+   - Desktop permanece com o comportamento original.
+   - Mobile usa WebGL a 90% para preservar nitidez.
+   - Reduz efeitos de composição e iluminação, sem deixar a
+     cena com aparência excessivamente pixelada.
    ========================================================= */
 (() => {
   const mobileQuery = window.matchMedia("(max-width: 820px)");
 
   if (!mobileQuery.matches) return;
 
-  console.log("[hashbrown] mobile performance mode enabled");
+  console.log("[hashbrown] mobile performance mode v2");
 
-  // Reduz a resolução interna do WebGL no celular.
-  renderer.setPixelRatio(0.65);
+  // 90% de resolução interna: mais nítido que a versão anterior.
+  renderer.setPixelRatio(0.9);
 
-  // Reduz a intensidade das luzes dinâmicas.
-  pink.intensity = 8;
-  blue.intensity = 8;
+  // Iluminação dinâmica mais leve.
+  pink.intensity = 9;
+  blue.intensity = 9;
 
-  // Desativa efeitos CSS caros de composição/blur.
-  const mobileStyle = document.createElement("style");
-  mobileStyle.textContent = `
-    @media (max-width: 820px) {
-      .party-colorwash,
-      .party-beams,
-      .party-strobes {
-        display: none !important;
-      }
-
-      .vibe-background {
-        opacity: 0.10 !important;
-      }
-
-      .vibe-background::after {
-        display: none !important;
-      }
-
-      .world-label,
-      .app-modal {
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-      }
-
-      .world-label,
-      .app-modal-shell {
-        box-shadow: none !important;
-      }
-    }
-  `;
-  document.head.appendChild(mobileStyle);
-
-  // Se o GLB já tiver terminado de carregar, garante culling no mobile.
+  // Garantir culling no modelo caso ele já tenha carregado.
   if (modelRoot) {
     modelRoot.traverse(obj => {
       if (!obj.isMesh) return;
-
       obj.frustumCulled = true;
       obj.castShadow = false;
       obj.receiveShadow = false;
     });
   }
 
-  // Aba em segundo plano: reduz ainda mais a carga de GPU.
+  // Quando a aba fica em segundo plano, economiza GPU.
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden) {
-      renderer.setPixelRatio(0.5);
-    } else {
-      renderer.setPixelRatio(0.65);
-    }
+    renderer.setPixelRatio(document.hidden ? 0.6 : 0.9);
   });
 })();
 
