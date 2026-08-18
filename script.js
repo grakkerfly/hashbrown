@@ -57,7 +57,7 @@ hashTarget.set(
   camera.lookAt(hashTarget);controls.enableZoom=true;controls.zoomSpeed=.65;controls.minDistance=modelSize*.28;controls.maxDistance=modelSize*1.75;controls.update();
   Object.keys(anchors).forEach(k=>anchors[k].multiplyScalar(modelSize));
 }
-new GLTFLoader().load("assets/dancefloor.glb",gltf=>{modelRoot=gltf.scene;modelRoot.traverse(o=>{if(o.isMesh){o.frustumCulled=false;const mats=Array.isArray(o.material)?o.material:[o.material];mats.forEach(m=>{if(m){m.side=THREE.DoubleSide;m.needsUpdate=true}})}});scene.add(modelRoot);frameModel(modelRoot);if(gltf.cameras.length){const blenderCamera=gltf.cameras[0];blenderCamera.getWorldPosition(camera.position);blenderCamera.getWorldQuaternion(camera.quaternion);if(blenderCamera.isPerspectiveCamera){camera.fov=blenderCamera.fov;camera.near=blenderCamera.near;camera.far=blenderCamera.far;camera.zoom=blenderCamera.zoom}camera.aspect=canvas.clientWidth/canvas.clientHeight;camera.updateProjectionMatrix();const cameraDirection=new THREE.Vector3();camera.getWorldDirection(cameraDirection);controls.dispose();controls=new OrbitControls(camera,canvas);controls.enableDamping=true;controls.dampingFactor=.055;controls.enablePan=false;controls.enableZoom=true;controls.zoomSpeed=.65;controls.target.copy(camera.position).addScaledVector(cameraDirection,modelSize);controls.update();camera.zoom*=1.12;camera.updateProjectionMatrix();const initialHorizontal=controls.getAzimuthalAngle(),initialVertical=controls.getPolarAngle(),initialDistance=camera.position.distanceTo(controls.target);controls.minAzimuthAngle=initialHorizontal-THREE.MathUtils.degToRad(12);controls.maxAzimuthAngle=initialHorizontal+THREE.MathUtils.degToRad(12);controls.minPolarAngle=initialVertical-THREE.MathUtils.degToRad(8);controls.maxPolarAngle=initialVertical+THREE.MathUtils.degToRad(8);controls.minDistance=initialDistance*.85;controls.maxDistance=initialDistance*1.05;controls.update()}if(gltf.animations.length){mixer=new THREE.AnimationMixer(modelRoot);gltf.animations.forEach(clip=>mixer.clipAction(clip).play())}loadingProgress(100);document.getElementById("sceneLoading").classList.add("is-hidden");setTimeout(()=>universeLoader.classList.add("is-done"),420)},xhr=>{if(xhr.total)loadingProgress(xhr.loaded/xhr.total*100);else loadingProgress(Math.min(92,(xhr.loaded/1000000)*4))},e=>{console.error(e);document.getElementById("sceneLoading").textContent="dancefloor.glb could not be loaded";loaderPercent.textContent="could not load dancefloor.glb"});
+new GLTFLoader().load("assets/dancefloor.glb",gltf=>{modelRoot=gltf.scene;modelRoot.traverse(o=>{if(o.isMesh){o.frustumCulled=!matchMedia("(max-width: 820px)").matches;const mats=Array.isArray(o.material)?o.material:[o.material];mats.forEach(m=>{if(m){m.side=THREE.DoubleSide;m.needsUpdate=true}})}});scene.add(modelRoot);frameModel(modelRoot);if(gltf.cameras.length){const blenderCamera=gltf.cameras[0];blenderCamera.getWorldPosition(camera.position);blenderCamera.getWorldQuaternion(camera.quaternion);if(blenderCamera.isPerspectiveCamera){camera.fov=blenderCamera.fov;camera.near=blenderCamera.near;camera.far=blenderCamera.far;camera.zoom=blenderCamera.zoom}camera.aspect=canvas.clientWidth/canvas.clientHeight;camera.updateProjectionMatrix();const cameraDirection=new THREE.Vector3();camera.getWorldDirection(cameraDirection);controls.dispose();controls=new OrbitControls(camera,canvas);controls.enableDamping=true;controls.dampingFactor=.055;controls.enablePan=false;controls.enableZoom=true;controls.zoomSpeed=.65;controls.target.copy(camera.position).addScaledVector(cameraDirection,modelSize);controls.update();camera.zoom*=1.12;camera.updateProjectionMatrix();const initialHorizontal=controls.getAzimuthalAngle(),initialVertical=controls.getPolarAngle(),initialDistance=camera.position.distanceTo(controls.target);controls.minAzimuthAngle=initialHorizontal-THREE.MathUtils.degToRad(12);controls.maxAzimuthAngle=initialHorizontal+THREE.MathUtils.degToRad(12);controls.minPolarAngle=initialVertical-THREE.MathUtils.degToRad(8);controls.maxPolarAngle=initialVertical+THREE.MathUtils.degToRad(8);controls.minDistance=initialDistance*.85;controls.maxDistance=initialDistance*1.05;controls.update()}if(gltf.animations.length){mixer=new THREE.AnimationMixer(modelRoot);gltf.animations.forEach(clip=>mixer.clipAction(clip).play())}loadingProgress(100);document.getElementById("sceneLoading").classList.add("is-hidden");setTimeout(()=>universeLoader.classList.add("is-done"),420)},xhr=>{if(xhr.total)loadingProgress(xhr.loaded/xhr.total*100);else loadingProgress(Math.min(92,(xhr.loaded/1000000)*4))},e=>{console.error(e);document.getElementById("sceneLoading").textContent="dancefloor.glb could not be loaded";loaderPercent.textContent="could not load dancefloor.glb"});
 function resize(){const w=canvas.clientWidth,h=canvas.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
 function projectLabels(){const direction=camera.position.clone().sub(controls.target).normalize();const parallaxX=THREE.MathUtils.clamp(direction.x*42,-42,42),parallaxY=THREE.MathUtils.clamp((direction.y-.2)*22,-18,18);document.querySelectorAll("[data-anchor]").forEach(el=>{const factor=Number(el.dataset.parallax||1);el.style.setProperty("--px",`${parallaxX*factor}px`);el.style.setProperty("--py",`${parallaxY*factor}px`)})}
 function animate(){requestAnimationFrame(animate);const d=Math.min(clock.getDelta(),.05);controls.update();if(mixer)mixer.update(d*vibes[currentIndex].speed);pink.intensity=18+Math.sin(performance.now()*.004)*8;blue.intensity=18+Math.cos(performance.now()*.003)*8;projectLabels();renderer.render(scene,camera)}
@@ -65,7 +65,27 @@ window.addEventListener("resize",resize);resize();animate();
 
 const audio=document.getElementById("vibeAudio"),vibeName=document.getElementById("vibeName"),vibeCount=document.getElementById("vibeCount"),trackName=document.getElementById("trackName"),playIcon=document.getElementById("playIcon"),playText=document.getElementById("playText"); audio.volume=.1;
 const vibeBackgroundImage=document.getElementById("vibeBackgroundImage"),vibeBackgroundVideo=document.getElementById("vibeBackgroundVideo");
-function updateVibeBackground(v){vibeBackgroundImage.classList.remove("is-active");vibeBackgroundVideo.classList.remove("is-active");vibeBackgroundVideo.pause();if(v.backgroundType==="video"){vibeBackgroundVideo.src=v.background;vibeBackgroundVideo.classList.add("is-active");vibeBackgroundVideo.load();vibeBackgroundVideo.play().catch(()=>{})}else{vibeBackgroundImage.src=v.background;vibeBackgroundImage.classList.add("is-active")}}
+function updateVibeBackground(v){
+  vibeBackgroundImage.classList.remove("is-active");
+  vibeBackgroundVideo.classList.remove("is-active");
+  vibeBackgroundVideo.pause();
+
+  if(matchMedia("(max-width: 820px)").matches){
+    vibeBackgroundVideo.removeAttribute("src");
+    vibeBackgroundVideo.load();
+    return;
+  }
+
+  if(v.backgroundType==="video"){
+    vibeBackgroundVideo.src=v.background;
+    vibeBackgroundVideo.classList.add("is-active");
+    vibeBackgroundVideo.load();
+    vibeBackgroundVideo.play().catch(()=>{});
+  }else{
+    vibeBackgroundImage.src=v.background;
+    vibeBackgroundImage.classList.add("is-active");
+  }
+}
 function updatePlayer(){const v=vibes[currentIndex];vibeName.textContent=v.name;trackName.textContent=v.track;vibeCount.textContent=`${String(currentIndex+1).padStart(2,"0")} / 11`;playIcon.textContent=playing?"Ⅱ":"▶";playText.textContent=playing?"pause":"play";updateVibeBackground(v)}
 async function setPlayback(value){playing=value;if(value){try{await audio.play()}catch(e){playing=false}}else audio.pause();updatePlayer()}
 function changeTrack(dir){const keep=playing;currentIndex=(currentIndex+dir+vibes.length)%vibes.length;audio.pause();audio.src=vibes[currentIndex].audio;audio.load();updatePlayer();if(keep)audio.addEventListener("canplay",()=>setPlayback(true),{once:true})}
@@ -101,3 +121,75 @@ document.querySelectorAll("[data-open-modal]").forEach(button=>button.addEventLi
 document.querySelectorAll("[data-close-modal]").forEach(button=>button.addEventListener("click",()=>closeAppModal(button.closest(".app-modal"))));
 document.querySelectorAll(".app-modal").forEach(item=>item.addEventListener("click",event=>{if(event.target===item)closeAppModal(item)}));
 window.addEventListener("keydown",event=>{if(event.key!=="Escape")return;const opened=document.querySelector(".app-modal.is-open");if(opened)closeAppModal(opened)});
+
+/* =========================================================
+   MOBILE PERFORMANCE MODE
+   Desktop permanece com o comportamento original.
+   ========================================================= */
+(() => {
+  const mobileQuery = window.matchMedia("(max-width: 820px)");
+
+  if (!mobileQuery.matches) return;
+
+  console.log("[hashbrown] mobile performance mode enabled");
+
+  // Reduz a resolução interna do WebGL no celular.
+  renderer.setPixelRatio(0.65);
+
+  // Reduz a intensidade das luzes dinâmicas.
+  pink.intensity = 8;
+  blue.intensity = 8;
+
+  // Desativa efeitos CSS caros de composição/blur.
+  const mobileStyle = document.createElement("style");
+  mobileStyle.textContent = `
+    @media (max-width: 820px) {
+      .party-colorwash,
+      .party-beams,
+      .party-strobes {
+        display: none !important;
+      }
+
+      .vibe-background {
+        opacity: 0.10 !important;
+      }
+
+      .vibe-background::after {
+        display: none !important;
+      }
+
+      .world-label,
+      .app-modal {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+      }
+
+      .world-label,
+      .app-modal-shell {
+        box-shadow: none !important;
+      }
+    }
+  `;
+  document.head.appendChild(mobileStyle);
+
+  // Se o GLB já tiver terminado de carregar, garante culling no mobile.
+  if (modelRoot) {
+    modelRoot.traverse(obj => {
+      if (!obj.isMesh) return;
+
+      obj.frustumCulled = true;
+      obj.castShadow = false;
+      obj.receiveShadow = false;
+    });
+  }
+
+  // Aba em segundo plano: reduz ainda mais a carga de GPU.
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      renderer.setPixelRatio(0.5);
+    } else {
+      renderer.setPixelRatio(0.65);
+    }
+  });
+})();
+
