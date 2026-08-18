@@ -19,7 +19,7 @@ const vibes=[
 
 const canvas=document.getElementById("dancefloorCanvas");
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:"high-performance"});
-renderer.setPixelRatio(matchMedia("(max-width: 820px)").matches ? 0.9 : Math.min(devicePixelRatio,1.5)); renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.setPixelRatio(matchMedia("(max-width: 820px)").matches ? 0.65 : Math.min(devicePixelRatio,1.5)); renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.15;
 const scene=new THREE.Scene(); scene.background=null;
 let camera=new THREE.PerspectiveCamera(38,1,.01,5000);
