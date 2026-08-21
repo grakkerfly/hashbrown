@@ -18,8 +18,9 @@ const vibes=[
 ].map(([name,track,audio,speed,background,backgroundType])=>({name,track,audio,speed,background,backgroundType}));
 
 const canvas=document.getElementById("dancefloorCanvas");
+const isMobile=matchMedia("(max-width: 820px)").matches;
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:"high-performance"});
-renderer.setPixelRatio(matchMedia("(max-width: 820px)").matches ? 0.65 : Math.min(devicePixelRatio,1.5)); renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.setPixelRatio(isMobile ? 0.60 : Math.min(devicePixelRatio,1.5)); renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.15;
 const scene=new THREE.Scene(); scene.background=null;
 let camera=new THREE.PerspectiveCamera(38,1,.01,5000);
@@ -69,7 +70,7 @@ function updateVibeBackground(v){
   vibeBackgroundImage.classList.remove("is-active");
   vibeBackgroundVideo.classList.remove("is-active");
   vibeBackgroundVideo.pause();
-  if(matchMedia("(max-width: 820px)").matches){
+  if(isMobile){
     vibeBackgroundVideo.removeAttribute("src");
     vibeBackgroundVideo.load();
     return;
@@ -101,7 +102,7 @@ async function renderPfp(){const version=++renderVersion,active=layerOrder.filte
 function changeTrait(t,d){const c=pfpConfig[t],min=c.optional?0:1,total=c.count-min+1;selection[t]=((selection[t]-min+d+total)%total)+min;label(t);renderPfp()}
 document.querySelectorAll(".trait-control").forEach(c=>c.querySelectorAll(".trait-arrow").forEach(b=>b.onclick=()=>changeTrait(c.dataset.trait,Number(b.dataset.direction))));
 document.getElementById("randomizePfp").onclick=()=>{layerOrder.forEach(t=>{selection[t]=Math.floor(Math.random()*pfpConfig[t].count)+1;label(t)});renderPfp()};
-document.getElementById("downloadPfp").onclick=async()=>{const blob=await new Promise(r=>pfpCanvas.toBlob(r,"image/png"));if(!blob)return;const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`hashbrown-pfp-${Date.now()}.png`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};layerOrder.forEach(label);renderPfp();
+document.getElementById("downloadPfp").onclick=async()=>{const blob=await new Promise(r=>pfpCanvas.toBlob(r,"image/png"));if(!blob)return;const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`hashbrown-pfp-${Date.now()}.png`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};layerOrder.forEach(label);if(!isMobile)renderPfp();
 
 const memeMedia={photos:Array.from({length:11},(_,i)=>({type:"image",src:`assets/memes/meme${i+1}.png`})),videos:Array.from({length:13},(_,i)=>({type:"video",src:`assets/memes/vid${i+1}.mp4`}))};
 const grid=document.getElementById("memeGrid"),tabs=[...document.querySelectorAll(".meme-tab")],modal=document.getElementById("memeModal"),frame=document.getElementById("memeModalFrame");let mediaType="photos",mediaIndex=0,resume=false;
@@ -111,9 +112,9 @@ function renderModal(){const m=memeMedia[mediaType][mediaIndex],el=document.crea
 function openModal(i){mediaIndex=i;if(mediaType==="videos"){resume=playing;if(playing)setPlayback(false)}renderModal();modal.classList.add("is-open");modal.style.display="flex";modal.setAttribute("aria-hidden","false");document.body.classList.add("meme-modal-open")}
 function closeModal(){modal.classList.remove("is-open");modal.style.display="none";modal.setAttribute("aria-hidden","true");document.body.classList.remove("meme-modal-open");frame.innerHTML="";if(resume){resume=false;setPlayback(true)}}
 function shiftModal(d){const a=memeMedia[mediaType];mediaIndex=(mediaIndex+d+a.length)%a.length;renderModal()}
-tabs.forEach(t=>t.onclick=()=>{mediaType=t.dataset.galleryType;tabs.forEach(x=>{x.classList.toggle("is-active",x===t);x.setAttribute("aria-selected",String(x===t))});renderGrid()});document.getElementById("memeModalClose").onclick=closeModal;document.getElementById("memeModalPrevious").onclick=()=>shiftModal(-1);document.getElementById("memeModalNext").onclick=()=>shiftModal(1);modal.onclick=e=>{if(e.target===modal||e.target.id==="memeModalContent")closeModal()};window.addEventListener("keydown",e=>{if(!modal.classList.contains("is-open"))return;if(e.key==="Escape")closeModal();if(e.key==="ArrowLeft")shiftModal(-1);if(e.key==="ArrowRight")shiftModal(1)},true);renderGrid();
+tabs.forEach(t=>t.onclick=()=>{mediaType=t.dataset.galleryType;tabs.forEach(x=>{x.classList.toggle("is-active",x===t);x.setAttribute("aria-selected",String(x===t))});renderGrid()});document.getElementById("memeModalClose").onclick=closeModal;document.getElementById("memeModalPrevious").onclick=()=>shiftModal(-1);document.getElementById("memeModalNext").onclick=()=>shiftModal(1);modal.onclick=e=>{if(e.target===modal||e.target.id==="memeModalContent")closeModal()};window.addEventListener("keydown",e=>{if(!modal.classList.contains("is-open"))return;if(e.key==="Escape")closeModal();if(e.key==="ArrowLeft")shiftModal(-1);if(e.key==="ArrowRight")shiftModal(1)},true);if(!isMobile)renderGrid();
 
-function openAppModal(id){const target=document.getElementById(id);if(!target)return;target.classList.add("is-open");target.setAttribute("aria-hidden","false")}
+function openAppModal(id){const target=document.getElementById(id);if(!target)return;if(isMobile&&id==="pfpModal"&&!target.dataset.mediaLoaded){target.dataset.mediaLoaded="true";renderPfp()}if(isMobile&&id==="galleryModal"&&!target.dataset.mediaLoaded){target.dataset.mediaLoaded="true";renderGrid()}target.classList.add("is-open");target.setAttribute("aria-hidden","false")}
 function closeAppModal(target){target.classList.remove("is-open");target.setAttribute("aria-hidden","true")}
 document.querySelectorAll("[data-open-modal]").forEach(button=>button.addEventListener("click",()=>openAppModal(button.dataset.openModal)));
 document.querySelectorAll("[data-close-modal]").forEach(button=>button.addEventListener("click",()=>closeAppModal(button.closest(".app-modal"))));
