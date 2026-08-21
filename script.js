@@ -20,7 +20,7 @@ const vibes=[
 const canvas=document.getElementById("dancefloorCanvas");
 const isMobile=matchMedia("(max-width: 820px)").matches;
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:"high-performance"});
-renderer.setPixelRatio(isMobile ? 0.60 : Math.min(devicePixelRatio,1.5)); renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.setPixelRatio(isMobile ? 1 : Math.min(devicePixelRatio,1.5)); renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.15;
 const scene=new THREE.Scene(); scene.background=null;
 let camera=new THREE.PerspectiveCamera(38,1,.01,5000);
@@ -108,7 +108,7 @@ document.getElementById("downloadPfp").onclick=async()=>{const blob=await new Pr
 const memeMedia={photos:Array.from({length:11},(_,i)=>({type:"image",src:`assets/memes/meme${i+1}.png`})),videos:Array.from({length:13},(_,i)=>({type:"video",src:`assets/memes/vid${i+1}.mp4`}))};
 const grid=document.getElementById("memeGrid"),tabs=[...document.querySelectorAll(".meme-tab")],modal=document.getElementById("memeModal"),frame=document.getElementById("memeModalFrame");let mediaType="photos",mediaIndex=0,resume=false;
 document.body.appendChild(modal);
-function renderGrid(){grid.innerHTML="";memeMedia[mediaType].forEach((m,i)=>{const b=document.createElement("button"),el=document.createElement(m.type==="image"?"img":"video");b.className="meme-item";b.type="button";el.src=m.src;if(m.type==="video"){el.muted=true;el.loop=true;el.playsInline=true;el.preload="metadata"}b.append(el);b.addEventListener("click",event=>{event.preventDefault();event.stopPropagation();openModal(i)});grid.append(b)})}
+function renderGrid(){grid.innerHTML="";memeMedia[mediaType].forEach((m,i)=>{const b=document.createElement("button"),el=document.createElement(m.type==="image"?"img":"video");b.className="meme-item";b.type="button";el.src=m.type==="video"&&isMobile?`${m.src}#t=0.1`:m.src;if(m.type==="video"){el.muted=true;el.loop=true;el.playsInline=true;el.preload=isMobile?"auto":"metadata";if(isMobile)el.addEventListener("loadedmetadata",()=>{try{el.currentTime=.1}catch(e){}},{once:true})}b.append(el);b.addEventListener("click",event=>{event.preventDefault();event.stopPropagation();openModal(i)});grid.append(b)})}
 function renderModal(){const m=memeMedia[mediaType][mediaIndex],el=document.createElement(m.type==="image"?"img":"video");el.src=m.src;if(m.type==="video"){el.controls=true;el.autoplay=true;el.playsInline=true}frame.replaceChildren(el)}
 function openModal(i){mediaIndex=i;if(mediaType==="videos"){resume=playing;if(playing)setPlayback(false)}renderModal();modal.classList.add("is-open");modal.style.display="flex";modal.setAttribute("aria-hidden","false");document.body.classList.add("meme-modal-open")}
 function closeModal(){modal.classList.remove("is-open");modal.style.display="none";modal.setAttribute("aria-hidden","true");document.body.classList.remove("meme-modal-open");frame.innerHTML="";if(resume){resume=false;setPlayback(true)}}
